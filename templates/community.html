@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Community - Health & Nutrition Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-users"></i> Community Forum</h2>
+        <p class="text-muted">Share recipes, workout tips, and connect with other health enthusiasts</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-plus"></i> Share Your Experience</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_post') }}">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="Share your recipe, workout, or tip..." required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="post_type" class="form-label">Category</label>
+                            <select class="form-select" id="post_type" name="post_type" required>
+                                <option value="">Select Category</option>
+                                <option value="recipe">🍽️ Recipe</option>
+                                <option value="workout">💪 Workout</option>
+                                <option value="general">💬 General</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="4" 
+                                  placeholder="Share your experience, tips, or recipe details..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Share Post
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-comments"></i> Recent Posts</h5>
+            </div>
+            <div class="card-body">
+                {% if posts %}
+                    {% for post in posts %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    {% if post.post_type == 'recipe' %}
+                                        <span class="badge bg-success me-2">🍽️ Recipe</span>
+                                    {% elif post.post_type == 'workout' %}
+                                        <span class="badge bg-primary me-2">💪 Workout</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary me-2">💬 General</span>
+                                    {% endif %}
+                                    {{ post.title }}
+                                </h6>
+                                <p class="mb-2">{{ post.content }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-user"></i> {{ post.author_name }} • 
+                                    <i class="fas fa-clock"></i> {{ post.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <h5>No posts yet</h5>
+                        <p class="text-muted">Be the first to share your experience with the community!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-fire"></i> Popular Topics</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <span class="badge bg-success me-2">🍽️</span>
+                    <strong>Healthy Recipes</strong>
+                    <p class="small text-muted mt-1">Share your favorite nutritious meals and cooking tips</p>
+                </div>
+                <div class="mb-3">
+                    <span class="badge bg-primary me-2">💪</span>
+                    <strong>Workout Routines</strong>
+                    <p class="small text-muted mt-1">Exercise plans, fitness tips, and motivation</p>
+                </div>
+                <div class="mb-3">
+                    <span class="badge bg-secondary me-2">💬</span>
+                    <strong>General Health</strong>
+                    <p class="small text-muted mt-1">Wellness tips, success stories, and support</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb"></i> Community Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        Be respectful and supportive
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        Share evidence-based information
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        No medical advice or diagnosis
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        Keep content relevant to health & nutrition
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-star"></i> Featured Recipe</h5>
+            </div>
+            <div class="card-body">
+                <h6>Protein-Rich Quinoa Bowl</h6>
+                <p class="small">
+                    A nutritious meal with quinoa, grilled chicken, mixed vegetables, 
+                    and tahini dressing. Perfect for post-workout recovery!
+                </p>
+                <div class="small text-muted">
+                    <i class="fas fa-fire"></i> 450 calories • 
+                    <i class="fas fa-dumbbell"></i> 35g protein
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-trophy"></i> Community Challenges</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-tint fa-2x text-info mb-2"></i>
+                            <h6>Hydration Challenge</h6>
+                            <p class="small">Drink 2.5L water daily for 7 days</p>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-info" style="width: 65%"></div>
+                            </div>
+                            <small class="text-muted">65% complete</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-walking fa-2x text-success mb-2"></i>
+                            <h6>Step Challenge</h6>
+                            <p class="small">Walk 10,000 steps daily for 30 days</p>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" style="width: 40%"></div>
+                            </div>
+                            <small class="text-muted">40% complete</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-bed fa-2x text-primary mb-2"></i>
+                            <h6>Sleep Challenge</h6>
+                            <p class="small">Get 7+ hours sleep for 14 days</p>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-primary" style="width: 80%"></div>
+                            </div>
+                            <small class="text-muted">80% complete</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-expand textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('content');
+    
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+});
+
+// Character counter for content
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('content');
+    const maxLength = 1000;
+    
+    const counter = document.createElement('small');
+    counter.className = 'text-muted';
+    counter.innerHTML = `<span id="char-count">0</span>/${maxLength} characters`;
+    textarea.parentNode.appendChild(counter);
+    
+    textarea.addEventListener('input', function() {
+        const count = this.value.length;
+        document.getElementById('char-count').textContent = count;
+        
+        if (count > maxLength * 0.9) {
+            counter.className = 'text-warning';
+        } else if (count > maxLength) {
+            counter.className = 'text-danger';
+        } else {
+            counter.className = 'text-muted';
+        }
+    });
+    
+    textarea.maxLength = maxLength;
+});
+</script>
+{% endblock %}

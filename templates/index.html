@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Health & Nutrition Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+            <h1 class="display-4">
+                <i class="fas fa-heartbeat"></i> 
+                AI-Based Health & Nutrition Tracker
+            </h1>
+            <p class="lead">
+                Take control of your health with personalized meal plans, nutrition tracking, 
+                and comprehensive health analytics powered by AI.
+            </p>
+            <hr class="my-4">
+            <p>
+                Track your daily nutrition, monitor your health metrics, get personalized meal recommendations, 
+                and achieve your wellness goals with our comprehensive platform.
+            </p>
+            {% if not session.user_id %}
+            <div class="mt-4">
+                <a class="btn btn-light btn-lg me-3" href="{{ url_for('register') }}" role="button">
+                    <i class="fas fa-user-plus"></i> Get Started
+                </a>
+                <a class="btn btn-outline-light btn-lg" href="{{ url_for('login') }}" role="button">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
+            {% else %}
+            <a class="btn btn-light btn-lg" href="{{ url_for('dashboard') }}" role="button">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Personalized Meal Plans</h5>
+                <p class="card-text">
+                    Get AI-generated meal plans based on your goals, preferences, and nutritional needs 
+                    using our extensive Indian food database.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Health Analytics</h5>
+                <p class="card-text">
+                    Monitor your progress with detailed charts, weekly health scores, 
+                    and comprehensive reports tracking all aspects of your wellness journey.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-bell fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">Smart Reminders</h5>
+                <p class="card-text">
+                    Stay on track with intelligent reminders for water intake, nutrition alerts, 
+                    and personalized recommendations based on your health data.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-lg-10 mx-auto">
+        <h2 class="text-center mb-4">Key Features</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        BMR/TDEE calculation with activity factors
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Comprehensive food nutrition database
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Daily food and health logging
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Sleep quality analysis
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Mood and stress tracking
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        PDF and Excel report generation
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Community forum for recipes and tips
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Calendar view with health scores
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Calendar - Health & Nutrition Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-calendar"></i> Health Calendar</h2>
+        <p class="text-muted">View your daily health scores and progress</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5>{{ month_names[month-1] }} {{ year }}</h5>
+                <div class="d-flex">
+                    <a href="{{ url_for('calendar_view', month=prev_month, year=prev_year) }}" 
+                       class="btn btn-outline-primary btn-sm me-2">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                    <a href="{{ url_for('calendar_view', month=next_month, year=next_year) }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6>Health Score Legend</h6>
+                <div class="d-flex align-items-center mb-1">
+                    <div class="bg-success rounded me-2" style="width: 20px; height: 20px;"></div>
+                    <small>Excellent (80-100)</small>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                    <div class="bg-warning rounded me-2" style="width: 20px; height: 20px;"></div>
+                    <small>Good (60-79)</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="bg-danger rounded me-2" style="width: 20px; height: 20px;"></div>
+                    <small>Needs Improvement (0-59)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered calendar-table">
+                        <thead>
+                            <tr class="bg-primary text-white">
+                                <th class="text-center">Sun</th>
+                                <th class="text-center">Mon</th>
+                                <th class="text-center">Tue</th>
+                                <th class="text-center">Wed</th>
+                                <th class="text-center">Thu</th>
+                                <th class="text-center">Fri</th>
+                                <th class="text-center">Sat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set first_day = first_day_of_month %}
+                            {% set days_in_month = days_in_month %}
+                            {% set current_day = 1 %}
+                            
+                            {% for week in range(6) %}
+                            <tr>
+                                {% for day_of_week in range(7) %}
+                                <td class="calendar-day p-2" style="height: 120px; width: 14.28%; vertical-align: top;">
+                                    {% set day_number = (week * 7 + day_of_week + 1) - first_day %}
+                                    {% if day_number > 0 and day_number <= days_in_month %}
+                                        <div class="day-number fw-bold mb-1">{{ day_number }}</div>
+                                        {% if day_number in calendar_data %}
+                                            {% set day_data = calendar_data[day_number] %}
+                                            {% set score = day_data.score %}
+                                            {% if score >= 80 %}
+                                                {% set score_class = 'bg-success' %}
+                                            {% elif score >= 60 %}
+                                                {% set score_class = 'bg-warning' %}
+                                            {% else %}
+                                                {% set score_class = 'bg-danger' %}
+                                            {% endif %}
+                                            
+                                            <div class="health-score {{ score_class }} text-white rounded p-1 mb-1 text-center small">
+                                                Score: {{ score }}
+                                            </div>
+                                            
+                                            <div class="day-details small">
+                                                {% if day_data.calories > 0 %}
+                                                <div class="text-truncate">
+                                                    <i class="fas fa-utensils text-primary"></i> {{ day_data.calories|round|int }}
+                                                </div>
+                                                {% endif %}
+                                                {% if day_data.water > 0 %}
+                                                <div class="text-truncate">
+                                                    <i class="fas fa-tint text-info"></i> {{ "%.1f"|format(day_data.water) }}L
+                                                </div>
+                                                {% endif %}
+                                                {% if day_data.sleep > 0 %}
+                                                <div class="text-truncate">
+                                                    <i class="fas fa-bed text-secondary"></i> {{ "%.1f"|format(day_data.sleep) }}h
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div class="text-muted small">No data</div>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-chart-bar"></i> Monthly Summary</h6>
+            </div>
+            <div class="card-body">
+                {% set total_days = calendar_data|length %}
+                {% if total_days > 0 %}
+                    {% set avg_score = (calendar_data.values()|map(attribute='score')|sum / total_days)|round(1) %}
+                    {% set logged_days = total_days %}
+                    
+                    <div class="mb-2">
+                        <strong>Average Health Score:</strong> {{ avg_score }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Days Logged:</strong> {{ logged_days }}/{{ days_in_month }}
+                    </div>
+                    <div class="progress mb-2">
+                        <div class="progress-bar" style="width: {{ (logged_days/days_in_month*100)|round }}%"></div>
+                    </div>
+                    <small class="text-muted">{{ (logged_days/days_in_month*100)|round }}% completion</small>
+                {% else %}
+                    <p class="text-muted">No data for this month</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-trophy"></i> Achievements</h6>
+            </div>
+            <div class="card-body">
+                {% if calendar_data %}
+                    {% set excellent_days = calendar_data.values()|selectattr('score', '>=', 80)|list|length %}
+                    {% set good_days = calendar_data.values()|selectattr('score', '>=', 60)|selectattr('score', '<', 80)|list|length %}
+                    
+                    <div class="mb-2">
+                        <i class="fas fa-star text-warning"></i>
+                        <strong>{{ excellent_days }}</strong> excellent days
+                    </div>
+                    <div class="mb-2">
+                        <i class="fas fa-thumbs-up text-success"></i>
+                        <strong>{{ good_days }}</strong> good days
+                    </div>
+                    
+                    {% if excellent_days >= 7 %}
+                    <div class="alert alert-success alert-sm p-2">
+                        <i class="fas fa-medal"></i> Week Warrior!
+                    </div>
+                    {% endif %}
+                    
+                    {% if logged_days >= 20 %}
+                    <div class="alert alert-info alert-sm p-2">
+                        <i class="fas fa-calendar-check"></i> Consistency Champion!
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted">Start logging to earn achievements!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-lightbulb"></i> Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('log_food') }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Log Today's Food
+                    </a>
+                    <a href="{{ url_for('health_tracking') }}" class="btn btn-info btn-sm">
+                        <i class="fas fa-heartbeat"></i> Log Health Data
+                    </a>
+                    <a href="{{ url_for('meal_plan') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-utensils"></i> Generate Meal Plan
+                    </a>
+                    <a href="{{ url_for('reports') }}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-file-alt"></i> View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add click handlers for calendar days
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarDays = document.querySelectorAll('.calendar-day');
+    
+    calendarDays.forEach(day => {
+        const dayNumber = day.querySelector('.day-number');
+        if (dayNumber) {
+            day.style.cursor = 'pointer';
+            day.addEventListener('click', function() {
+                const day_num = dayNumber.textContent;
+                const date = new Date({{ year }}, {{ month - 1 }}, day_num);
+                const dateString = date.toISOString().split('T')[0];
+                
+                // Redirect to health tracking with pre-filled date
+                window.location.href = `{{ url_for('health_tracking') }}?date=${dateString}`;
+            });
+            
+            // Add hover effect
+            day.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = '#f8f9fa';
+            });
+            
+            day.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+            });
+        }
+    });
+});
+
+// Add tooltips for better UX
+document.addEventListener('DOMContentLoaded', function() {
+    const healthScores = document.querySelectorAll('.health-score');
+    
+    healthScores.forEach(score => {
+        const scoreValue = parseInt(score.textContent.replace('Score: ', ''));
+        let tooltip = '';
+        
+        if (scoreValue >= 80) {
+            tooltip = 'Excellent health day! Keep it up!';
+        } else if (scoreValue >= 60) {
+            tooltip = 'Good progress. Room for improvement.';
+        } else {
+            tooltip = 'Focus on better nutrition and health habits.';
+        }
+        
+        score.title = tooltip;
+    });
+});
+</script>
+
+<style>
+.calendar-table td {
+    border: 1px solid #dee2e6;
+}
+
+.calendar-day:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.day-details {
+    font-size: 0.75rem;
+}
+
+.health-score {
+    font-size: 0.7rem;
+}
+
+.alert-sm {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}

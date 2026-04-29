@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Health & Nutrition Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Welcome back, {{ user.name }}!</h2>
+        <p class="text-muted">Here's your health overview for today</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">BMR</h6>
+                        <h4>{{ bmr }} cal</h4>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-fire fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">TDEE</h6>
+                        <h4>{{ tdee }} cal</h4>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-running fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Today's Calories</h6>
+                        <h4>{{ today_stats.calories|round|int if today_stats.calories else 0 }}</h4>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-utensils fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="card-title">Water (L)</h6>
+                        <h4>{{ "%.1f"|format(today_stats.water) if today_stats.water else "0.0" }}</h4>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-tint fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Weekly Calories</h5>
+            </div>
+            <div class="card-body">
+                {% if charts.calories %}
+                <img src="data:image/png;base64,{{ charts.calories }}" class="img-fluid" alt="Calories Chart">
+                {% else %}
+                <p class="text-muted">No data available. Start logging your meals!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tint"></i> Weekly Water Intake</h5>
+            </div>
+            <div class="card-body">
+                {% if charts.water %}
+                <img src="data:image/png;base64,{{ charts.water }}" class="img-fluid" alt="Water Chart">
+                {% else %}
+                <p class="text-muted">No data available. Start logging your water intake!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                <h5>Generate Meal Plan</h5>
+                <p class="text-muted">Get personalized meal recommendations</p>
+                <a href="{{ url_for('meal_plan') }}" class="btn btn-primary">
+                    <i class="fas fa-magic"></i> Generate Plan
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
+                <h5>Log Food</h5>
+                <p class="text-muted">Track your daily nutrition intake</p>
+                <a href="{{ url_for('log_food') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Log Food
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+                <h5>Health Tracking</h5>
+                <p class="text-muted">Log sleep, mood, and activities</p>
+                <a href="{{ url_for('health_tracking') }}" class="btn btn-info">
+                    <i class="fas fa-heartbeat"></i> Track Health
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Health Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-tint text-info"></i> Hydration</h6>
+                        <p class="small">Aim for 2.5-3 liters of water daily. Your body needs adequate hydration for optimal metabolism.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-bed text-primary"></i> Sleep</h6>
+                        <p class="small">Get 7-9 hours of quality sleep. Good sleep is crucial for weight management and overall health.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

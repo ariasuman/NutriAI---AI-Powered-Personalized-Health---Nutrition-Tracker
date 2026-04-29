@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Log Food - Health & Nutrition Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-plus-circle"></i> Log Your Food</h2>
+        <p class="text-muted">Track your daily nutrition intake</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-utensils"></i> Add Food Entry</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" 
+                                   value="{{ date.today() }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="meal_type" class="form-label">Meal Type</label>
+                            <select class="form-select" id="meal_type" name="meal_type" required>
+                                <option value="">Select Meal Type</option>
+                                <option value="breakfast">🌅 Breakfast</option>
+                                <option value="lunch">☀️ Lunch</option>
+                                <option value="dinner">🌙 Dinner</option>
+                                <option value="snack">🍪 Snack</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="dish_id" class="form-label">Food Item</label>
+                        <select class="form-select" id="dish_id" name="dish_id" required onchange="updateNutrition()">
+                            <option value="">Search and select food...</option>
+                            {% for food in foods %}
+                            <option value="{{ food.id }}" 
+                                    data-calories="{{ food.calories }}"
+                                    data-protein="{{ food.protein }}"
+                                    data-carbs="{{ food.carbohydrates }}"
+                                    data-fats="{{ food.fats }}">
+                                {{ food.dish_name }} ({{ food.calories|round|int }} cal)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="portion" class="form-label">Portion Size</label>
+                            <input type="number" class="form-control" id="portion" name="portion" 
+                                   value="1.0" step="0.1" min="0.1" max="10" required onchange="updateNutrition()">
+                            <small class="text-muted">1.0 = standard serving</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Calculated Calories</label>
+                            <input type="text" class="form-control" id="calculated_calories" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Protein (g)</label>
+                            <input type="text" class="form-control" id="calculated_protein" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Carbs (g)</label>
+                            <input type="text" class="form-control" id="calculated_carbs" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Fats (g)</label>
+                            <input type="text" class="form-control" id="calculated_fats" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-plus"></i> Log Food
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Logs</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_logs %}
+                    {% for log in recent_logs %}
+                    <div class="mb-2 p-2 border rounded">
+                        <small class="text-muted">{{ log.date.strftime('%m/%d') }} - {{ log.meal_type.title() if log.meal_type else 'Health' }}</small>
+                        <div class="fw-bold">{{ log.dish_name or 'Health Data' }}</div>
+                        {% if log.calories_consumed %}
+                        <small class="text-success">{{ log.calories_consumed|round|int }} calories</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No recent logs found.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-search"></i> Quick Search</h5>
+            </div>
+            <div class="card-body">
+                <input type="text" class="form-control" id="food_search" 
+                       placeholder="Type to search foods..." onkeyup="filterFoods()">
+                <div id="search_results" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Nutrition Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6><i class="fas fa-dumbbell text-primary"></i> Protein</h6>
+                        <p class="small">Aim for 0.8-1g per kg body weight daily for maintenance.</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6><i class="fas fa-bread-slice text-warning"></i> Carbs</h6>
+                        <p class="small">Choose complex carbs for sustained energy.</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6><i class="fas fa-seedling text-success"></i> Fats</h6>
+                        <p class="small">Include healthy fats like nuts, seeds, and olive oil.</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6><i class="fas fa-apple-alt text-danger"></i> Portions</h6>
+                        <p class="small">Use your hand as a guide: palm = protein, fist = vegetables.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateNutrition() {
+    const select = document.getElementById('dish_id');
+    const portion = parseFloat(document.getElementById('portion').value) || 1;
+    
+    if (select.selectedIndex > 0) {
+        const option = select.options[select.selectedIndex];
+        const calories = parseFloat(option.dataset.calories) || 0;
+        const protein = parseFloat(option.dataset.protein) || 0;
+        const carbs = parseFloat(option.dataset.carbs) || 0;
+        const fats = parseFloat(option.dataset.fats) || 0;
+        
+        document.getElementById('calculated_calories').value = Math.round(calories * portion);
+        document.getElementById('calculated_protein').value = (protein * portion).toFixed(1);
+        document.getElementById('calculated_carbs').value = (carbs * portion).toFixed(1);
+        document.getElementById('calculated_fats').value = (fats * portion).toFixed(1);
+    } else {
+        document.getElementById('calculated_calories').value = '';
+        document.getElementById('calculated_protein').value = '';
+        document.getElementById('calculated_carbs').value = '';
+        document.getElementById('calculated_fats').value = '';
+    }
+}
+
+function filterFoods() {
+    const searchTerm = document.getElementById('food_search').value.toLowerCase();
+    const select = document.getElementById('dish_id');
+    const resultsDiv = document.getElementById('search_results');
+    
+    if (searchTerm.length < 2) {
+        resultsDiv.innerHTML = '';
+        return;
+    }
+    
+    let results = '';
+    for (let i = 1; i < select.options.length; i++) {
+        const option = select.options[i];
+        if (option.text.toLowerCase().includes(searchTerm)) {
+            results += `<div class="p-1 border-bottom" style="cursor: pointer;" 
+                               onclick="selectFood(${option.value}, '${option.text}')">
+                           ${option.text}
+                        </div>`;
+        }
+    }
+    
+    resultsDiv.innerHTML = results;
+}
+
+function selectFood(value, text) {
+    document.getElementById('dish_id').value = value;
+    document.getElementById('search_results').innerHTML = '';
+    document.getElementById('food_search').value = text.split(' (')[0];
+    updateNutrition();
+}
+
+// Initialize nutrition display
+document.addEventListener('DOMContentLoaded', function() {
+    updateNutrition();
+});
+</script>
+{% endblock %}
